@@ -50,6 +50,25 @@ bot.on(message('voice'), async ctx => {
     
 })
 
+bot.on(message('text'), async ctx => {
+    
+    ctx.session ??= INITIAL_SESSION
+    
+    try {
+        await ctx.reply(code('Текстовое сообщение принял. Жду ответ от сервера...'))
+        ctx.session.messages.push({ role: openai.roles.USER, context: ctx.message.text })
+        
+        const response = await openai.chat(ctx.session.messages)
+        
+        ctx.session.messages.push({ role: openai.roles.ASSISTANT, context: response.content })
+        
+        await ctx.reply(response.content)
+    } catch (e) {
+        console.log("Error while voice message", e.message)
+    }
+    
+})
+
 // bot.command('start', async (ctx) => {
 //     await ctx.reply("Антон гавно")
 //    // await ctx.reply(JSON.stringify(ctx.message, null, 2))
